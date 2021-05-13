@@ -147,17 +147,17 @@ func (a *Account) Richest(limit int) (*Accounts, error) {
 	return accounts, nil
 }
 
-func (a *Account) Get(accountID string) (*Accounts, error) {
+func (a *Account) Get(accountID string) (*AccountData, error) {
 	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", accountID), nil)
 	if err != nil {
-		return &Accounts{}, err
+		return &AccountData{}, err
 	}
-	var accounts *Accounts
-	err = json.Unmarshal(resp, &accounts)
+	var account *AccountData
+	err = json.Unmarshal(resp, &account)
 	if err != nil {
-		return &Accounts{}, err
+		return &AccountData{}, err
 	}
-	return accounts, nil
+	return account, nil
 }
 
 func (a *Account) Hotspots(accountID string) (*Hotspots, error) {
