@@ -16,6 +16,10 @@ type Accounts struct {
 	Cursor string        `json:"cursor"`
 }
 
+type UserAccount struct {
+	Data AccountData `json:"data"`
+}
+
 type AccountData struct {
 	SecNonce   int    `json:"sec_nonce"`
 	SecBalance int    `json:"sec_balance"`
@@ -147,15 +151,15 @@ func (a *Account) Richest(limit int) (*Accounts, error) {
 	return accounts, nil
 }
 
-func (a *Account) Get(accountID string) (*AccountData, error) {
+func (a *Account) Get(accountID string) (*UserAccount, error) {
 	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", accountID), nil)
 	if err != nil {
-		return &AccountData{}, err
+		return &UserAccount{}, err
 	}
-	var account *AccountData
+	var account *UserAccount
 	err = json.Unmarshal(resp, &account)
 	if err != nil {
-		return &AccountData{}, err
+		return &UserAccount{}, err
 	}
 	return account, nil
 }
