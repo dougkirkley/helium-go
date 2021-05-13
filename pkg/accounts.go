@@ -1,15 +1,14 @@
-package blockchain
+package helium
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
-	helium "github.com/dougkirkley/helium-go/pkg/client"
 )
 
 type Account struct {
-	client *helium.Client
+	client *Client
 }
 
 type Accounts struct {
@@ -110,7 +109,7 @@ type CountsData struct {
 	AssertLocationV1 int `json:"assert_location_v1"`
 }
 
-func (c *helium.Client) Account() *Account {
+func (c *Client) Account() *Account {
 	return &Account{c}
 }
 
