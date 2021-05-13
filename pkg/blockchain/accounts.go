@@ -1,14 +1,15 @@
-package helium
+package blockchain
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+	helium "github.com/dougkirkley/helium-go/pkg/client"
 )
 
 type Account struct {
-	client *Client
+	client *helium.Client
 }
 
 type Accounts struct {
@@ -109,7 +110,11 @@ type CountsData struct {
 	AssertLocationV1 int `json:"assert_location_v1"`
 }
 
-func (a *Account) Accounts(cursor string) (*Accounts, error) {
+func (c *helium.Client) Account() *Account {
+	return &Account{c}
+}
+
+func (a *Account) List(cursor string) (*Accounts, error) {
 	params := make(map[string]string)
 	if len(cursor) > 0 {
 		params["cursor"] = cursor
@@ -143,7 +148,7 @@ func (a *Account) Richest(limit int) (*Accounts, error) {
 	return accounts, nil
 }
 
-func (a *Account) Account(accountID string) (*Accounts, error) {
+func (a *Account) Get(accountID string) (*Accounts, error) {
 	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", accountID), nil)
 	if err != nil {
 		return &Accounts{}, err

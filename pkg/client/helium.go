@@ -1,4 +1,4 @@
-package helium
+package client
 
 import (
 	"fmt"
