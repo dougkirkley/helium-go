@@ -11,6 +11,10 @@ type Account struct {
 	client *Client
 }
 
+func (c *Client) Account() *Account {
+	return &Account{c}
+}
+
 type Accounts struct {
 	Data   []AccountData `json:"data"`
 	Cursor string        `json:"cursor"`
@@ -32,13 +36,16 @@ type AccountData struct {
 }
 
 type Hotspots struct {
-	Data []HotspotData `json:"data"`
+	Data   []HotspotData `json:"data"`
+	Cursor string        `json:"cursor"`
 }
+
 type Status struct {
 	Online      string   `json:"online"`
 	ListenAddrs []string `json:"listen_addrs"`
 	Height      int      `json:"height"`
 }
+
 type Geocode struct {
 	ShortStreet  string `json:"short_street"`
 	ShortState   string `json:"short_state"`
@@ -50,6 +57,7 @@ type Geocode struct {
 	LongCity     string `json:"long_city"`
 	CityID       string `json:"city_id"`
 }
+
 type HotspotData struct {
 	Lng              float64   `json:"lng"`
 	Lat              float64   `json:"lat"`
@@ -71,12 +79,15 @@ type HotspotData struct {
 }
 
 type Ouis struct {
-	Data []OuiData `json:"data"`
+	Data   []OuiData `json:"data"`
+	Cursor string    `json:"cursor"`
 }
+
 type Subnets struct {
 	Mask int `json:"mask"`
 	Base int `json:"base"`
 }
+
 type OuiData struct {
 	Subnets   []Subnets `json:"subnets"`
 	Owner     string    `json:"owner"`
@@ -87,34 +98,185 @@ type OuiData struct {
 }
 
 type Activity struct {
-	Data []ActivityData `json:"data"`
+	Data   []ActivityData `json:"data"`
+	Cursor string         `json:"cursor"`
 }
-type Rewards struct {
+
+type Reward struct {
 	Type    string `json:"type"`
 	Gateway string `json:"gateway"`
 	Amount  int    `json:"amount"`
 	Account string `json:"account"`
 }
+
 type ActivityData struct {
-	Type       string    `json:"type"`
-	Time       int       `json:"time"`
-	StartEpoch int       `json:"start_epoch"`
-	Rewards    []Rewards `json:"rewards"`
-	Height     int       `json:"height"`
-	Hash       string    `json:"hash"`
-	EndEpoch   int       `json:"end_epoch"`
+	Type       string   `json:"type"`
+	Time       int      `json:"time"`
+	StartEpoch int      `json:"start_epoch"`
+	Rewards    []Reward `json:"rewards"`
+	Height     int      `json:"height"`
+	Hash       string   `json:"hash"`
+	EndEpoch   int      `json:"end_epoch"`
 }
 
 type ActivityCount struct {
 	Data CountsData `json:"data"`
 }
+
 type CountsData struct {
 	AddGatewayV1     int `json:"add_gateway_v1"`
 	AssertLocationV1 int `json:"assert_location_v1"`
 }
 
-func (c *Client) Account() *Account {
-	return &Account{c}
+type Elections struct {
+	Data   []ElectionData `json:"data"`
+	Cursor string         `json:"cursor"`
+}
+
+type ElectionData struct {
+	Type    string   `json:"type"`
+	Time    int      `json:"time"`
+	Proof   string   `json:"proof"`
+	Members []string `json:"members"`
+	Height  int      `json:"height"`
+	Hash    string   `json:"hash"`
+	Delay   int      `json:"delay"`
+}
+
+type Challenges struct {
+	Data   []ChallengeData `json:"data"`
+	Cursor string          `json:"cursor"`
+}
+
+type Witnesses struct {
+	Timestamp  int64   `json:"timestamp"`
+	Snr        int     `json:"snr"`
+	Signal     int     `json:"signal"`
+	PacketHash string  `json:"packet_hash"`
+	Owner      string  `json:"owner"`
+	Location   string  `json:"location"`
+	IsValid    bool    `json:"is_valid"`
+	Gateway    string  `json:"gateway"`
+	Frequency  float64 `json:"frequency"`
+	Datarate   string  `json:"datarate"`
+	Channel    int     `json:"channel"`
+}
+
+type Receipt struct {
+	Timestamp int64       `json:"timestamp"`
+	Snr       int         `json:"snr"`
+	Signal    int         `json:"signal"`
+	Origin    string      `json:"origin"`
+	Gateway   string      `json:"gateway"`
+	Frequency int         `json:"frequency"`
+	Datarate  interface{} `json:"datarate"`
+	Data      string      `json:"data"`
+	Channel   int         `json:"channel"`
+}
+
+type Path struct {
+	Witnesses          []Witnesses `json:"witnesses"`
+	Receipt            Receipt     `json:"receipt"`
+	Geocode            Geocode     `json:"geocode"`
+	ChallengeeOwner    string      `json:"challengee_owner"`
+	ChallengeeLon      float64     `json:"challengee_lon"`
+	ChallengeeLocation string      `json:"challengee_location"`
+	ChallengeeLat      float64     `json:"challengee_lat"`
+	Challengee         string      `json:"challengee"`
+}
+
+type ChallengeData struct {
+	Type               string  `json:"type"`
+	Time               int     `json:"time"`
+	Secret             string  `json:"secret"`
+	RequestBlockHash   string  `json:"request_block_hash"`
+	Path               []Path  `json:"path"`
+	OnionKeyHash       string  `json:"onion_key_hash"`
+	Height             int     `json:"height"`
+	Hash               string  `json:"hash"`
+	Fee                int     `json:"fee"`
+	ChallengerOwner    string  `json:"challenger_owner"`
+	ChallengerLon      float64 `json:"challenger_lon"`
+	ChallengerLocation string  `json:"challenger_location"`
+	ChallengerLat      float64 `json:"challenger_lat"`
+	Challenger         string  `json:"challenger"`
+}
+
+type PendingTransactions struct {
+	Data   []PendingTransactionData `json:"data"`
+	Cursor string                   `json:"cursor"`
+}
+
+type Payments struct {
+	Amount int    `json:"amount"`
+	Payee  string `json:"payee"`
+}
+
+type Txn struct {
+	Fee       int        `json:"fee"`
+	Nonce     int        `json:"nonce"`
+	Payer     string     `json:"payer"`
+	Payments  []Payments `json:"payments"`
+	Signature string     `json:"signature"`
+}
+
+type PendingTransactionData struct {
+	CreatedAt    time.Time `json:"created_at"`
+	FailedReason string    `json:"failed_reason"`
+	Hash         string    `json:"hash"`
+	Status       string    `json:"status"`
+	Txn          Txn       `json:"txn"`
+	Type         string    `json:"type"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type Rewards struct {
+	Data []RewardData `json:"data"`
+}
+
+type RewardData struct {
+	CreatedAt    time.Time `json:"created_at"`
+	FailedReason string    `json:"failed_reason"`
+	Hash         string    `json:"hash"`
+	Status       string    `json:"status"`
+	Txn          Txn       `json:"txn"`
+	Type         string    `json:"type"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type RewardSum struct {
+	Data RewardSumData `json:"data"`
+}
+
+type RewardSumData struct {
+	MaxTime time.Time `json:"max_time"`
+	MinTime time.Time `json:"min_time"`
+	Sum     string    `json:"sum"`
+}
+
+type Stats struct {
+	Data StatsData `json:"data"`
+}
+
+type LastWeek struct {
+	Timestamp time.Time `json:"timestamp"`
+	Balance   int64     `json:"balance"`
+}
+
+type LastMonth struct {
+	Timestamp time.Time `json:"timestamp"`
+	Balance   int64     `json:"balance"`
+}
+
+type LastDay struct {
+	Timestamp time.Time `json:"timestamp"`
+	Balance   int64     `json:"balance"`
+}
+
+type StatsData struct {
+	LastWeek  []LastWeek  `json:"last_week"`
+	LastMonth []LastMonth `json:"last_month"`
+	LastDay   []LastDay   `json:"last_day"`
 }
 
 func (a *Account) List(cursor string) (*Accounts, error) {
@@ -214,6 +376,84 @@ func (a *Account) ActivityCount(accountID string) (*ActivityCount, error) {
 		return &ActivityCount{}, err
 	}
 	return activityCount, nil
+}
+
+func (a *Account) Elections(accountID string) (*Elections, error) {
+	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/elections", accountID), nil)
+	if err != nil {
+		return &Elections{}, err
+	}
+	var elections *Elections
+	err = json.Unmarshal(resp, &elections)
+	if err != nil {
+		return &Elections{}, err
+	}
+	return elections, nil
+}
+
+func (a *Account) Challenges(accountID string) (*Challenges, error) {
+	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/challenges", accountID), nil)
+	if err != nil {
+		return &Challenges{}, err
+	}
+	var challenges *Challenges
+	err = json.Unmarshal(resp, &challenges)
+	if err != nil {
+		return &Challenges{}, err
+	}
+	return challenges, nil
+}
+
+func (a *Account) PendingTransactions(accountID string) (*PendingTransactions, error) {
+	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/pending_transactions", accountID), nil)
+	if err != nil {
+		return &PendingTransactions{}, err
+	}
+	var pendingTransactions *PendingTransactions
+	err = json.Unmarshal(resp, &pendingTransactions)
+	if err != nil {
+		return &PendingTransactions{}, err
+	}
+	return pendingTransactions, nil
+}
+
+func (a *Account) Rewards(accountID string) (*Rewards, error) {
+	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards", accountID), nil)
+	if err != nil {
+		return &Rewards{}, err
+	}
+	var rewards *Rewards
+	err = json.Unmarshal(resp, &rewards)
+	if err != nil {
+		return &Rewards{}, err
+	}
+	return rewards, nil
+}
+
+func (a *Account) RewardSum(accountID string) (*RewardSum, error) {
+	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards/sum", accountID), nil)
+	if err != nil {
+		return &RewardSum{}, err
+	}
+	var rewardSum *RewardSum
+	err = json.Unmarshal(resp, &rewardSum)
+	if err != nil {
+		return &RewardSum{}, err
+	}
+	return rewardSum, nil
+}
+
+func (a *Account) Stats(accountID string) (*Stats, error) {
+	resp, err := a.client.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/stats", accountID), nil)
+	if err != nil {
+		return &Stats{}, err
+	}
+	var stats *Stats
+	err = json.Unmarshal(resp, &stats)
+	if err != nil {
+		return &Stats{}, err
+	}
+	return stats, nil
 }
 
 func (a *Accounts) Next() bool {
