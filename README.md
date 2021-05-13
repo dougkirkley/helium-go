@@ -1,2 +1,2 @@
 # helium-go
-Go implementation of Helium
+Go implementation of Helium API client
