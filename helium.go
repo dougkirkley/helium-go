@@ -13,7 +13,7 @@ const (
 	// BETAURL url for v1 beta api
 	BETAURL = "api.helium.wtf/v1"
 	// HTTPTimeout timeout for http requests
-	HTTPTimeout = 60
+	DefaultHTTPTimeout = 60
 )
 
 // Client
@@ -28,7 +28,7 @@ type Option func(*Client)
 
 func DefaultClient() *Client {
 	client := &http.Client{
-		Timeout: time.Second * HTTPTimeout,
+		Timeout: time.Second * DefaultHTTPTimeout,
 	}
 	return &Client{
 		client: client,
@@ -40,7 +40,7 @@ func DefaultClient() *Client {
 func ClientWithOptions(opts ...Option) *Client {
 	c := &Client{
 		client: &http.Client{
-			Timeout: time.Second * HTTPTimeout,
+			Timeout: time.Second * DefaultHTTPTimeout,
 		},
 		URL: APIURL,
 	}
@@ -92,7 +92,7 @@ func (c *Client) Request(method string, path string, params map[string]string) (
 	defer resp.Body.Close()
 
 	if resp.Status != "200 OK" {
-		return nil, fmt.Errorf("request returned %s", resp.Status)
+		return nil, fmt.Errorf("request returned %s\n, %s", resp.Status, err.Error())
 	}
 
 	return ioutil.ReadAll(resp.Body)
