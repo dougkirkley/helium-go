@@ -7,3 +7,4 @@ type Hotspot struct {
 func (c *Client) Hotspot() *Hotspot {
 	return &Hotspot{c}
 }
+

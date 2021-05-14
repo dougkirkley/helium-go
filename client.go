@@ -14,9 +14,11 @@ const (
 	BETAURL = "api.helium.wtf/v1"
 	// HTTPTimeout timeout for http requests
 	DefaultHTTPTimeout = 60
+	// NoQuery for empty queries
+	NoQuery = ""
 )
 
-// Client
+// Client provides http access to helium api
 type Client struct {
 	client *http.Client
 	URL    string
@@ -50,12 +52,14 @@ func ClientWithOptions(opts ...Option) *Client {
 	return c
 }
 
+// WithKey client with api key
 func WithKey(key string) Option {
 	return func(c *Client) {
 		c.Key = key
 	}
 }
 
+// WithURL for supplying a non default api endpoint like the Beta
 func WithURL(url string) Option {
 	return func(c *Client) {
 		c.URL = url
