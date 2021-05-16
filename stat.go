@@ -1,6 +1,7 @@
 package helium
 
 import (
+	"bytes"
 	"net/http"
 	"encoding/json"
 )
@@ -88,12 +89,14 @@ List Retrieve basic stats for the blockchain such as total token supply,
 and average block and election times over a number of intervals.
 */
 func (s *Stat) List() (*Stats, error) {
-	resp, err := s.c.Request(http.MethodGet, "/stats", nil)
+	resp, err := s.c.Request(http.MethodGet, "/stats", new(bytes.Buffer), nil)
 	if err != nil {
 		return &Stats{}, err
 	}
+	defer resp.Body.Close()
+	
 	var stats *Stats
-	err = json.Unmarshal(resp, &stats)
+	err = json.NewDecoder(resp.Body).Decode(&stats)
 	if err != nil {
 		return &Stats{}, err
 	}
@@ -102,12 +105,14 @@ func (s *Stat) List() (*Stats, error) {
 
 // TokenSupply Returns the circulating token supply
 func (s *Stat) TokenSupply() (*TokenSupply, error) {
-	resp, err := s.c.Request(http.MethodGet, "/stats/token_supply", nil)
+	resp, err := s.c.Request(http.MethodGet, "/stats/token_supply", new(bytes.Buffer), nil)
 	if err != nil {
 		return &TokenSupply{}, err
 	}
+	defer resp.Body.Close()
+
 	var tokenSupply *TokenSupply
-	err = json.Unmarshal(resp, &tokenSupply)
+	err = json.NewDecoder(resp.Body).Decode(&tokenSupply)
 	if err != nil {
 		return &TokenSupply{}, err
 	}

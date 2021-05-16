@@ -1,6 +1,7 @@
 package helium
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -37,11 +38,6 @@ type AccountData struct {
 	Address    string `json:"address"`
 }
 
-type Hotspots struct {
-	Data   []HotspotData `json:"data"`
-	Cursor string        `json:"cursor"`
-}
-
 type Status struct {
 	Online      string   `json:"online"`
 	ListenAddrs []string `json:"listen_addrs"`
@@ -58,26 +54,6 @@ type Geocode struct {
 	LongCountry  string `json:"long_country"`
 	LongCity     string `json:"long_city"`
 	CityID       string `json:"city_id"`
-}
-
-type HotspotData struct {
-	Lng              float64   `json:"lng"`
-	Lat              float64   `json:"lat"`
-	TimestampAdded   time.Time `json:"timestamp_added"`
-	Status           Status    `json:"status"`
-	RewardScale      float64   `json:"reward_scale"`
-	Owner            string    `json:"owner"`
-	Nonce            int       `json:"nonce"`
-	Name             string    `json:"name"`
-	Location         string    `json:"location"`
-	LastPocChallenge int       `json:"last_poc_challenge"`
-	LastChangeBlock  int       `json:"last_change_block"`
-	Geocode          Geocode   `json:"geocode"`
-	Gain             int       `json:"gain"`
-	Elevation        int       `json:"elevation"`
-	BlockAdded       int       `json:"block_added"`
-	Block            int       `json:"block"`
-	Address          string    `json:"address"`
 }
 
 type Ouis struct {
@@ -150,7 +126,7 @@ type Challenges struct {
 	Cursor string          `json:"cursor"`
 }
 
-type Witnesses struct {
+type Witness struct {
 	Timestamp  int64   `json:"timestamp"`
 	Snr        int     `json:"snr"`
 	Signal     int     `json:"signal"`
@@ -177,14 +153,14 @@ type Receipt struct {
 }
 
 type Path struct {
-	Witnesses          []Witnesses `json:"witnesses"`
-	Receipt            Receipt     `json:"receipt"`
-	Geocode            Geocode     `json:"geocode"`
-	ChallengeeOwner    string      `json:"challengee_owner"`
-	ChallengeeLon      float64     `json:"challengee_lon"`
-	ChallengeeLocation string      `json:"challengee_location"`
-	ChallengeeLat      float64     `json:"challengee_lat"`
-	Challengee         string      `json:"challengee"`
+	Witnesses          []Witness `json:"witnesses"`
+	Receipt            Receipt   `json:"receipt"`
+	Geocode            Geocode   `json:"geocode"`
+	ChallengeeOwner    string    `json:"challengee_owner"`
+	ChallengeeLon      float64   `json:"challengee_lon"`
+	ChallengeeLocation string    `json:"challengee_location"`
+	ChallengeeLat      float64   `json:"challengee_lat"`
+	Challengee         string    `json:"challengee"`
 }
 
 type ChallengeData struct {
@@ -204,9 +180,9 @@ type ChallengeData struct {
 	Challenger         string  `json:"challenger"`
 }
 
-type PendingTransactions struct {
-	Data   []PendingTransactionData `json:"data"`
-	Cursor string                   `json:"cursor"`
+type AccountPendingTransactions struct {
+	Data   []AccountPendingTransactionData `json:"data"`
+	Cursor string                          `json:"cursor"`
 }
 
 type Payments struct {
@@ -222,7 +198,7 @@ type Txn struct {
 	Signature string     `json:"signature"`
 }
 
-type PendingTransactionData struct {
+type AccountPendingTransactionData struct {
 	CreatedAt    time.Time `json:"created_at"`
 	FailedReason string    `json:"failed_reason"`
 	Hash         string    `json:"hash"`
@@ -287,12 +263,14 @@ func (a *Account) List(cursor string) (*Accounts, error) {
 	if len(cursor) > 0 {
 		params["cursor"] = cursor
 	}
-	resp, err := a.c.Request(http.MethodGet, "/accounts", params)
+	resp, err := a.c.Request(http.MethodGet, "/accounts", new(bytes.Buffer), params)
 	if err != nil {
 		return &Accounts{}, err
 	}
+	defer resp.Body.Close()
+
 	var accounts *Accounts
-	err = json.Unmarshal(resp, &accounts)
+	err = json.NewDecoder(resp.Body).Decode(&accounts)
 	if err != nil {
 		return &Accounts{}, err
 	}
@@ -305,12 +283,14 @@ func (a *Account) Richest(limit int) (*Accounts, error) {
 	if limit > 0 {
 		params["limit"] = fmt.Sprintf("%v", limit)
 	}
-	resp, err := a.c.Request(http.MethodGet, "/accounts/rich", params)
+	resp, err := a.c.Request(http.MethodGet, "/accounts/rich", new(bytes.Buffer), params)
 	if err != nil {
 		return &Accounts{}, err
 	}
+	defer resp.Body.Close()
+
 	var accounts *Accounts
-	err = json.Unmarshal(resp, &accounts)
+	err = json.NewDecoder(resp.Body).Decode(&accounts)
 	if err != nil {
 		return &Accounts{}, err
 	}
@@ -319,12 +299,14 @@ func (a *Account) Richest(limit int) (*Accounts, error) {
 
 // Get Retrieve a specific account record.
 func (a *Account) Get(accountID string) (*UserAccount, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &UserAccount{}, err
 	}
+	defer resp.Body.Close()
+
 	var account *UserAccount
-	err = json.Unmarshal(resp, &account)
+	err = json.NewDecoder(resp.Body).Decode(&account)
 	if err != nil {
 		return &UserAccount{}, err
 	}
@@ -333,12 +315,14 @@ func (a *Account) Get(accountID string) (*UserAccount, error) {
 
 // Hotspots Fetches hotspots owned by a given account address.
 func (a *Account) Hotspots(accountID string) (*Hotspots, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/hotspots", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/hotspots", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Hotspots{}, err
 	}
+	defer resp.Body.Close()
+
 	var hotspots *Hotspots
-	err = json.Unmarshal(resp, &hotspots)
+	err = json.NewDecoder(resp.Body).Decode(&hotspots)
 	if err != nil {
 		return &Hotspots{}, err
 	}
@@ -347,12 +331,14 @@ func (a *Account) Hotspots(accountID string) (*Hotspots, error) {
 
 // Ouis Fetches OUIs owned by a given account address.
 func (a *Account) Ouis(accountID string) (*Ouis, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/ouis", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/ouis", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Ouis{}, err
 	}
+	defer resp.Body.Close()
+
 	var ouis *Ouis
-	err = json.Unmarshal(resp, &ouis)
+	err = json.NewDecoder(resp.Body).Decode(&ouis)
 	if err != nil {
 		return &Ouis{}, err
 	}
@@ -361,12 +347,14 @@ func (a *Account) Ouis(accountID string) (*Ouis, error) {
 
 // Activity Fetches transactions that indicate activity for an account.
 func (a *Account) Activity(accountID string) (*Activity, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Activity{}, err
 	}
+	defer resp.Body.Close()
+
 	var activity *Activity
-	err = json.Unmarshal(resp, &activity)
+	err = json.NewDecoder(resp.Body).Decode(&activity)
 	if err != nil {
 		return &Activity{}, err
 	}
@@ -375,12 +363,14 @@ func (a *Account) Activity(accountID string) (*Activity, error) {
 
 // ActivityCount Count transactions that indicate activity for an account.
 func (a *Account) ActivityCount(accountID string) (*ActivityCount, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity/count", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity/count", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &ActivityCount{}, err
 	}
+	defer resp.Body.Close()
+
 	var activityCount *ActivityCount
-	err = json.Unmarshal(resp, &activityCount)
+	err = json.NewDecoder(resp.Body).Decode(&activityCount)
 	if err != nil {
 		return &ActivityCount{}, err
 	}
@@ -389,12 +379,14 @@ func (a *Account) ActivityCount(accountID string) (*ActivityCount, error) {
 
 // Elections Fetches elections that hotspots for the given account are elected in.
 func (a *Account) Elections(accountID string) (*Elections, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/elections", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/elections", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Elections{}, err
 	}
+	defer resp.Body.Close()
+
 	var elections *Elections
-	err = json.Unmarshal(resp, &elections)
+	err = json.NewDecoder(resp.Body).Decode(&elections)
 	if err != nil {
 		return &Elections{}, err
 	}
@@ -403,12 +395,14 @@ func (a *Account) Elections(accountID string) (*Elections, error) {
 
 // Challenges Fetches challenges that hotspots owned by the given account are involved in as a challenger, challengee, or witness.
 func (a *Account) Challenges(accountID string) (*Challenges, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/challenges", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/challenges", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Challenges{}, err
 	}
+	defer resp.Body.Close()
+
 	var challenges *Challenges
-	err = json.Unmarshal(resp, &challenges)
+	err = json.NewDecoder(resp.Body).Decode(&challenges)
 	if err != nil {
 		return &Challenges{}, err
 	}
@@ -417,40 +411,46 @@ func (a *Account) Challenges(accountID string) (*Challenges, error) {
 
 // PendingTransactions Fetches the outstanding transactions for the given account.
 func (a *Account) PendingTransactions(accountID string) (*PendingTransactions, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/pending_transactions", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/pending_transactions", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &PendingTransactions{}, err
 	}
+	defer resp.Body.Close()
+
 	var pendingTransactions *PendingTransactions
-	err = json.Unmarshal(resp, &pendingTransactions)
+	err = json.NewDecoder(resp.Body).Decode(&pendingTransactions)
 	if err != nil {
 		return &PendingTransactions{}, err
 	}
 	return pendingTransactions, nil
 }
 
-// Rewards Returns reward entries by block and gateway for a given account in a timeframe. 
+// Rewards Returns reward entries by block and gateway for a given account in a timeframe.
 func (a *Account) Rewards(accountID string) (*Rewards, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Rewards{}, err
 	}
+	defer resp.Body.Close()
+
 	var rewards *Rewards
-	err = json.Unmarshal(resp, &rewards)
+	err = json.NewDecoder(resp.Body).Decode(&rewards)
 	if err != nil {
 		return &Rewards{}, err
 	}
 	return rewards, nil
 }
 
-//RewardSum Returns the total rewards for a given account in a given timeframe. 
+//RewardSum Returns the total rewards for a given account in a given timeframe.
 func (a *Account) RewardSum(accountID string) (*RewardSum, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards/sum", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards/sum", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &RewardSum{}, err
 	}
+	defer resp.Body.Close()
+
 	var rewardSum *RewardSum
-	err = json.Unmarshal(resp, &rewardSum)
+	err = json.NewDecoder(resp.Body).Decode(&rewardSum)
 	if err != nil {
 		return &RewardSum{}, err
 	}
@@ -459,12 +459,14 @@ func (a *Account) RewardSum(accountID string) (*RewardSum, error) {
 
 // Stats Fetches account statistics for a given account.
 func (a *Account) Stats(accountID string) (*AccountStats, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/stats", accountID), nil)
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/stats", accountID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &AccountStats{}, err
 	}
+	defer resp.Body.Close()
+	
 	var stats *AccountStats
-	err = json.Unmarshal(resp, &stats)
+	err = json.NewDecoder(resp.Body).Decode(&stats)
 	if err != nil {
 		return &AccountStats{}, err
 	}

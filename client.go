@@ -1,8 +1,8 @@
-package helium 
+package helium
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -67,10 +67,10 @@ func WithURL(url string) Option {
 }
 
 // Request handles http requests
-func (c *Client) Request(method string, path string, params map[string]string) ([]byte, error) {
+func (c *Client) Request(method string, path string, body *bytes.Buffer, params map[string]string) (*http.Response, error) {
 	path = fmt.Sprintf("https://%s%s", c.URL, path)
 	// Create request
-	req, err := http.NewRequest(method, path, nil)
+	req, err := http.NewRequest(method, path, body)
 	if err != nil {
 		return nil, err
 	}
@@ -93,11 +93,9 @@ func (c *Client) Request(method string, path string, params map[string]string) (
 		return nil, err
 	}
 
-	defer resp.Body.Close()
-
 	if resp.Status != "200 OK" {
 		return nil, fmt.Errorf("request returned %s\n, %s", resp.Status, err.Error())
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	return resp, nil
 }

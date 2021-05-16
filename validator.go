@@ -1,6 +1,7 @@
 package helium
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -195,12 +196,14 @@ type Meta struct {
 
 // List List known validators as registered on the blockchain.
 func (v *Validator) List() (*Validators, error) {
-	resp, err := v.c.Request(http.MethodGet, "/validators", nil)
+	resp, err := v.c.Request(http.MethodGet, "/validators", new(bytes.Buffer), nil)
 	if err != nil {
 		return &Validators{}, err
 	}
+	defer resp.Body.Close()
+
 	var validators *Validators
-	err = json.Unmarshal(resp, &validators)
+	err = json.NewDecoder(resp.Body).Decode(&validators)
 	if err != nil {
 		return &Validators{}, err
 	}
@@ -209,12 +212,14 @@ func (v *Validator) List() (*Validators, error) {
 
 // Get Fetch a validator with a given address.
 func (v *Validator) Get(address string) (*ValidatorInfo, error) {
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s", address), nil)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s", address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &ValidatorInfo{}, err
 	}
+	defer resp.Body.Close()
+
 	var validatorInfo *ValidatorInfo
-	err = json.Unmarshal(resp, &validatorInfo)
+	err = json.NewDecoder(resp.Body).Decode(&validatorInfo)
 	if err != nil {
 		return &ValidatorInfo{}, err
 	}
@@ -223,12 +228,14 @@ func (v *Validator) Get(address string) (*ValidatorInfo, error) {
 
 // GetByName Fetch the validators which map to the given 3-word animal name. 
 func (v *Validator) GetByName(name string) (*ValidatorInfo, error) {
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/name/%s", name), nil)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/name/%s", name), new(bytes.Buffer), nil)
 	if err != nil {
 		return &ValidatorInfo{}, err
 	}
+	defer resp.Body.Close()
+
 	var validatorInfo *ValidatorInfo
-	err = json.Unmarshal(resp, &validatorInfo)
+	err = json.NewDecoder(resp.Body).Decode(&validatorInfo)
 	if err != nil {
 		return &ValidatorInfo{}, err
 	}
@@ -236,32 +243,36 @@ func (v *Validator) GetByName(name string) (*ValidatorInfo, error) {
 }
 
 // Search Fetch the validators which match a search term in the given search term query parameter.
-func (v *Validator) Search(term string) (*ValidatorInfo, error) {
+func (v *Validator) Search(term string) (*Validators, error) {
 	if len(term) < 1 {
-		return &ValidatorInfo{}, fmt.Errorf("search term must be 1 character or more, 3 is recommended")
+		return &Validators{}, fmt.Errorf("search term must be 1 character or more, 3 is recommended")
 	}
 	params := make(map[string]string)
 	params["search"] = term
-	resp, err := v.c.Request(http.MethodGet, "/validators/name", params)
+	resp, err := v.c.Request(http.MethodGet, "/validators/name", new(bytes.Buffer), params)
 	if err != nil {
-		return &ValidatorInfo{}, err
+		return &Validators{}, err
 	}
-	var validatorInfo *ValidatorInfo
-	err = json.Unmarshal(resp, &validatorInfo)
+	defer resp.Body.Close()
+
+	var validators *Validators
+	err = json.NewDecoder(resp.Body).Decode(&validators)
 	if err != nil {
-		return &ValidatorInfo{}, err
+		return &Validators{}, err
 	}
-	return validatorInfo, nil
+	return validators, nil
 }
 
 // Activity Lists all blockchain transactions that the given validator was involved in.
 func (v *Validator) Activity(address string) (*ValidatorActivity, error) {
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/activity", address), nil)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/activity", address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &ValidatorActivity{}, err
 	}
+	defer resp.Body.Close()
+
 	var validatorActivity *ValidatorActivity
-	err = json.Unmarshal(resp, &validatorActivity)
+	err = json.NewDecoder(resp.Body).Decode(&validatorActivity)
 	if err != nil {
 		return &ValidatorActivity{}, err
 	}
@@ -274,12 +285,14 @@ func (v *Validator) ActivityCount(address string, filterTypes string) (*Validato
 	if len(filterTypes) > 0 {
 		params["filter_types"] = filterTypes
 	}
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/activity/count", address), params)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/activity/count", address), new(bytes.Buffer), params)
 	if err != nil {
 		return &ValidatorActivityCount{}, err
 	}
+	defer resp.Body.Close()
+
 	var validatorActivityCount *ValidatorActivityCount
-	err = json.Unmarshal(resp, &validatorActivityCount)
+	err = json.NewDecoder(resp.Body).Decode(&validatorActivityCount)
 	if err != nil {
 		return &ValidatorActivityCount{}, err
 	}
@@ -288,12 +301,14 @@ func (v *Validator) ActivityCount(address string, filterTypes string) (*Validato
 
 // Stats Returns stats for validators
 func (v *Validator) Stats(address string) (*ValidatorStats, error) {
-	resp, err := v.c.Request(http.MethodGet, "/validators/stats", nil)
+	resp, err := v.c.Request(http.MethodGet, "/validators/stats", new(bytes.Buffer), nil)
 	if err != nil {
 		return &ValidatorStats{}, err
 	}
+	defer resp.Body.Close()
+
 	var validatorStats *ValidatorStats
-	err = json.Unmarshal(resp, &validatorStats)
+	err = json.NewDecoder(resp.Body).Decode(&validatorStats)
 	if err != nil {
 		return &ValidatorStats{}, err
 	}
@@ -302,12 +317,14 @@ func (v *Validator) Stats(address string) (*ValidatorStats, error) {
 
 // ListElected Returns the list of validators that are currently elected to the consensus group.
 func (v *Validator) ListElected() (*ValidatorElections, error) {
-	resp, err := v.c.Request(http.MethodGet, "/validators/elected", nil)
+	resp, err := v.c.Request(http.MethodGet, "/validators/elected", new(bytes.Buffer), nil)
 	if err != nil {
 		return &ValidatorElections{}, err
 	}
+	defer resp.Body.Close()
+
 	var validatorElections *ValidatorElections
-	err = json.Unmarshal(resp, &validatorElections)
+	err = json.NewDecoder(resp.Body).Decode(&validatorElections)
 	if err != nil {
 		return &ValidatorElections{}, err
 	}
@@ -316,12 +333,14 @@ func (v *Validator) ListElected() (*ValidatorElections, error) {
 
 // ElectedAtHeight Returns the list of validators that were in the consensus group at a given block height
 func (v *Validator) ElectedAtHeight(height string,) (*Validators, error) {
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/elected/%s", height), nil)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/elected/%s", height), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Validators{}, err
 	}
+	defer resp.Body.Close()
+
 	var validators *Validators
-	err = json.Unmarshal(resp, &validators)
+	err = json.NewDecoder(resp.Body).Decode(&validators)
 	if err != nil {
 		return &Validators{}, err
 	}
@@ -330,12 +349,14 @@ func (v *Validator) ElectedAtHeight(height string,) (*Validators, error) {
 
 // ElectedAtHash Returns the list of validators that were elected in the consensus group transcation indicated by the given transaction hash.
 func (v *Validator) ElectedAtHash(hash string,) (*Validators, error) {
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/elected/hash/%s", hash), nil)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/elected/hash/%s", hash), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Validators{}, err
 	}
+	defer resp.Body.Close()
+
 	var validators *Validators
-	err = json.Unmarshal(resp, &validators)
+	err = json.NewDecoder(resp.Body).Decode(&validators)
 	if err != nil {
 		return &Validators{}, err
 	}
@@ -351,12 +372,14 @@ func (v *Validator) Rewards(address string, cursor string, maxTime string, minTi
 	params["max_time"] = maxTime
 	params["min_time"] = minTime
 
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/rewards", address), params)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/rewards", address), new(bytes.Buffer), params)
 	if err != nil {
 		return &Validators{}, err
 	}
+	defer resp.Body.Close()
+
 	var validators *Validators
-	err = json.Unmarshal(resp, &validators)
+	err = json.NewDecoder(resp.Body).Decode(&validators)
 	if err != nil {
 		return &Validators{}, err
 	}
@@ -365,12 +388,14 @@ func (v *Validator) Rewards(address string, cursor string, maxTime string, minTi
 
 // RewardsSum Returns the total rewards earned for a given validator over a given time range.
 func (v *Validator) RewardsSum(address string,) (*ValidatorRewardsSum, error) {
-	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/rewards/sum", address), nil)
+	resp, err := v.c.Request(http.MethodGet, fmt.Sprintf("/validators/%s/rewards/sum", address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &ValidatorRewardsSum{}, err
 	}
+	defer resp.Body.Close()
+	
 	var validatorRewardsSum *ValidatorRewardsSum
-	err = json.Unmarshal(resp, &validatorRewardsSum)
+	err = json.NewDecoder(resp.Body).Decode(&validatorRewardsSum)
 	if err != nil {
 		return &ValidatorRewardsSum{}, err
 	}

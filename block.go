@@ -1,6 +1,7 @@
 package helium
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -92,12 +93,14 @@ type HashTransactions struct {
 
 // List Retrieves block descriptions.
 func (b *Block) List(cursor string) (*Blocks, error) {
-	resp, err := b.c.Request(http.MethodGet, "/blocks", nil)
+	resp, err := b.c.Request(http.MethodGet, "/blocks", new(bytes.Buffer), nil)
 	if err != nil {
 		return &Blocks{}, err
 	}
+	defer resp.Body.Close()
+
 	var blocks *Blocks
-	err = json.Unmarshal(resp, &blocks)
+	err = json.NewDecoder(resp.Body).Decode(&blocks)
 	if err != nil {
 		return &Blocks{}, err
 	}
@@ -106,12 +109,14 @@ func (b *Block) List(cursor string) (*Blocks, error) {
 
 // Get Get block descriptor for block at height
 func (b *Block) Get(hash string) (*Block, error) {
-	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s", hash), nil)
+	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s", hash), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Block{}, err
 	}
+	defer resp.Body.Close()
+
 	var block *Block
-	err = json.Unmarshal(resp, &block)
+	err = json.NewDecoder(resp.Body).Decode(&block)
 	if err != nil {
 		return &Block{}, err
 	}
@@ -120,12 +125,14 @@ func (b *Block) Get(hash string) (*Block, error) {
 
 // CurrentHeight Gets the current height of the blockchainn.
 func (b *Block) CurrentHeight(cursor string) (*Height, error) {
-	resp, err := b.c.Request(http.MethodGet, "/blocks/height", nil)
+	resp, err := b.c.Request(http.MethodGet, "/blocks/height", new(bytes.Buffer), nil)
 	if err != nil {
 		return &Height{}, err
 	}
+	defer resp.Body.Close()
+
 	var height *Height
-	err = json.Unmarshal(resp, &height)
+	err = json.NewDecoder(resp.Body).Decode(&height)
 	if err != nil {
 		return &Height{}, err
 	}
@@ -134,12 +141,14 @@ func (b *Block) CurrentHeight(cursor string) (*Height, error) {
 
 // Stats Get statistics on block production times.
 func (b *Block) Stats(cursor string) (*BlockStats, error) {
-	resp, err := b.c.Request(http.MethodGet, "/blocks/stats", nil)
+	resp, err := b.c.Request(http.MethodGet, "/blocks/stats", new(bytes.Buffer), nil)
 	if err != nil {
 		return &BlockStats{}, err
 	}
+	defer resp.Body.Close()
+
 	var stats *BlockStats
-	err = json.Unmarshal(resp, &stats)
+	err = json.NewDecoder(resp.Body).Decode(&stats)
 	if err != nil {
 		return &BlockStats{}, err
 	}
@@ -148,12 +157,14 @@ func (b *Block) Stats(cursor string) (*BlockStats, error) {
 
 // GetHeight Get block descriptor for block at height
 func (b *Block) GetHeight(height string) (*BlockHeight, error) {
-	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/height", height), nil)
+	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/height", height), new(bytes.Buffer), nil)
 	if err != nil {
 		return &BlockHeight{}, err
 	}
+	defer resp.Body.Close()
+
 	var block *BlockHeight
-	err = json.Unmarshal(resp, &block)
+	err = json.NewDecoder(resp.Body).Decode(&block)
 	if err != nil {
 		return &BlockHeight{}, err
 	}
@@ -162,12 +173,14 @@ func (b *Block) GetHeight(height string) (*BlockHeight, error) {
 
 // Transactions Get transactions for a block at a given height.
 func (b *Block) Transactions(height string) (*Transactions, error) {
-	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/transactions", height), nil)
+	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/transactions", height), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Transactions{}, err
 	}
+	defer resp.Body.Close()
+
 	var transactions *Transactions
-	err = json.Unmarshal(resp, &transactions)
+	err = json.NewDecoder(resp.Body).Decode(&transactions)
 	if err != nil {
 		return &Transactions{}, err
 	}
