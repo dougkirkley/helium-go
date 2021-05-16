@@ -1,14 +1,17 @@
 # helium-go
 
-Go implementation of Helium API client
+Go implementation of Helium API client to access the public [Helium](https://helium.com) blockchain REST API.
 
 # Overview
-The Helium API is a REST API service as defined by the blockhain-http service. This library supports the conventions as exposed by the API. This includes:
+The Helium API is a REST API service as defined by the
+[blockhain-http](https://github.com/helium/blockchain-http) service This library supports the conventions as exposed by the API. This includes:
 
 * Modular access to each of the main areas of the Helium API
 * Support for paged responses
 
-Contributions and helpful suggestions are always welcome
+Contributions and helpful suggestions are [always
+welcome](https://github.com/dougkirkley/helium-go/issues)
+
 
 # Quickstart Instructions
 
