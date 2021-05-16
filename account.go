@@ -102,8 +102,32 @@ type ActivityCount struct {
 }
 
 type CountsData struct {
-	AddGatewayV1     int `json:"add_gateway_v1"`
-	AssertLocationV1 int `json:"assert_location_v1"`
+	VarsV1                  int `json:"vars_v1"`
+	TransferHotspotV1       int `json:"transfer_hotspot_v1"`
+	TokenBurnV1             int `json:"token_burn_v1"`
+	TokenBurnExchangeRateV1 int `json:"token_burn_exchange_rate_v1"`
+	StateChannelOpenV1      int `json:"state_channel_open_v1"`
+	StateChannelCloseV1     int `json:"state_channel_close_v1"`
+	SecurityExchangeV1      int `json:"security_exchange_v1"`
+	SecurityCoinbaseV1      int `json:"security_coinbase_v1"`
+	RoutingV1               int `json:"routing_v1"`
+	RewardsV2               int `json:"rewards_v2"`
+	RewardsV1               int `json:"rewards_v1"`
+	RedeemHtlcV1            int `json:"redeem_htlc_v1"`
+	PriceOracleV1           int `json:"price_oracle_v1"`
+	PocRequestV1            int `json:"poc_request_v1"`
+	PocReceiptsV1           int `json:"poc_receipts_v1"`
+	PaymentV2               int `json:"payment_v2"`
+	PaymentV1               int `json:"payment_v1"`
+	OuiV1                   int `json:"oui_v1"`
+	GenGatewayV1            int `json:"gen_gateway_v1"`
+	DcCoinbaseV1            int `json:"dc_coinbase_v1"`
+	CreateHtlcV1            int `json:"create_htlc_v1"`
+	ConsensusGroupV1        int `json:"consensus_group_v1"`
+	CoinbaseV1              int `json:"coinbase_v1"`
+	AssertLocationV2        int `json:"assert_location_v2"`
+	AssertLocationV1        int `json:"assert_location_v1"`
+	AddGatewayV1            int `json:"add_gateway_v1"`
 }
 
 type Elections struct {
