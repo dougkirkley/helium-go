@@ -464,7 +464,7 @@ func (a *Account) Stats(accountID string) (*AccountStats, error) {
 		return &AccountStats{}, err
 	}
 	defer resp.Body.Close()
-	
+
 	var stats *AccountStats
 	err = json.NewDecoder(resp.Body).Decode(&stats)
 	if err != nil {

@@ -18,13 +18,11 @@ func (c *Client) Validator() *Validator {
 	return &Validator{c}
 }
 
-// Validators holds the data for the /validators endpoint
 type Validators struct {
 	Data   []ValidatorData `json:"data"`
 	Cursor string          `json:"cursor"`
 }
 
-// ValidatorData the data per validator
 type ValidatorData struct {
 	VersionHeartbeat int           `json:"version_heartbeat"`
 	Status           Status        `json:"status"`
@@ -40,25 +38,21 @@ type ValidatorData struct {
 	Address          string        `json:"address"`
 }
 
-// ValidatorInfo info for a singular validator
 type ValidatorInfo struct {
 	Data ValidatorData `json:"data"`
 }
 
-// Penalties penalty info
 type Penalties struct {
 	Type   string `json:"type"`
 	Height int    `json:"height"`
 	Amount int    `json:"amount"`
 }
 
-// ValidatorActivity holds the data for /validators/:validator/activity endpoint
 type ValidatorActivity struct {
 	Cursor string                  `json:"cursor"`
 	Data   []ValidatorActivityData `json:"data"`
 }
 
-// ValidatorActivityData the data per validator activity
 type ValidatorActivityData struct {
 	Address   string `json:"address"`
 	Hash      string `json:"hash"`
@@ -69,12 +63,10 @@ type ValidatorActivityData struct {
 	Version   int    `json:"version"`
 }
 
-// ValidatorActivityCount holds the data for /validators/:validator/activity/count endpoint
 type ValidatorActivityCount struct {
 	Data ValidatorActivityCountData `json:"data"`
 }
 
-// ValidatorActivityCountsData the data per validator activity count
 type ValidatorActivityCountData struct {
 	VarsV1                   int `json:"vars_v1"`
 	ValidatorHeartbeatV1     int `json:"validator_heartbeat_v1"`
@@ -109,30 +101,25 @@ type ValidatorActivityCountData struct {
 	AddGatewayV1             int `json:"add_gateway_v1"`
 }
 
-// ValidatorStats holds the data for /validators/:validator/stats
 type ValidatorStats struct {
 	Data ValidatorStatsData `json:"data"`
 }
 
-// Cooldown struct
 type Cooldown struct {
 	Amount int `json:"amount"`
 	Count  int `json:"count"`
 }
 
-// Stakes struct
 type Staked struct {
 	Amount float64 `json:"amount"`
 	Count  int     `json:"count"`
 }
 
-// Unstaked
 type Unstaked struct {
 	Amount float64 `json:"amount"`
 	Count  int     `json:"count"`
 }
 
-// ValidatorStatsData data for validator stats
 type ValidatorStatsData struct {
 	Active   int      `json:"active"`
 	Cooldown Cooldown `json:"cooldown"`
@@ -140,12 +127,10 @@ type ValidatorStatsData struct {
 	Unstaked Unstaked `json:"unstaked"`
 }
 
-// ValidatorElections holds the data for the /validators/:validator/elected endpoint
 type ValidatorElections struct {
 	Data []ValidatorElectionData `json:"data"`
 }
 
-// ValidatorelectionData data for validator election
 type ValidatorElectionData struct {
 	VersionHeartbeat int    `json:"version_heartbeat"`
 	Status           string `json:"status"`
@@ -156,12 +141,10 @@ type ValidatorElectionData struct {
 	Address          string `json:"address"`
 }
 
-// ValidatorRewards holds the data for the /validator/:validator/rewards endpoint
 type ValidatorRewards struct {
 	Data []ValidatorRewardData `json:"data"`
 }
 
-// ValidatorRewardData data for validator reward
 type ValidatorRewardData struct {
 	Account   string    `json:"account"`
 	Amount    int       `json:"amount"`
@@ -171,13 +154,11 @@ type ValidatorRewardData struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-// ValidatorRewardsSum holds the data for the /validator/:validator/rewards/sum endpoint
 type ValidatorRewardsSum struct {
 	Data ValidatorRewardsSumData `json:"data"`
 	Meta Meta `json:"meta"`
 }
 
-// ValidatorRewardsSumData data for validator rewards sum
 type ValidatorRewardsSumData struct {
 	Avg    float64 `json:"avg"`
 	Max    float64 `json:"max"`
@@ -188,13 +169,12 @@ type ValidatorRewardsSumData struct {
 	Total  float64 `json:"total"`
 }
 
-// Meta struct
 type Meta struct {
 	MaxTime time.Time `json:"max_time"`
 	MinTime time.Time `json:"min_time"`
 }
 
-// List List known validators as registered on the blockchain.
+// List list known validators as registered on the blockchain.
 func (v *Validator) List() (*Validators, error) {
 	resp, err := v.c.Request(http.MethodGet, "/validators", new(bytes.Buffer), nil)
 	if err != nil {
