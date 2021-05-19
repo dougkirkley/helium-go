@@ -33,11 +33,13 @@ import (
 
 func main() {
 	client := helium.DefaultClient()
-	account, err := client.Account().Get("13buBykFQf5VaQtv7mWj2PBY9Lq4i1DeXhg7C4Vbu3ppzqqNkTH")
+	accounts, err := client.Account().List(&helium.AccountListInput{})
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Account: %v", account.Data)
+	for _, account := range accounts.Data {
+		fmt.Println(account.Address)
+	}
 }
 ```
 See the _examples folder and unit tests for more examples.
