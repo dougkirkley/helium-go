@@ -91,9 +91,19 @@ type HashTransactions struct {
 	Data []TransactionData `json:"data"`
 }
 
+type BlockCursorInput struct {
+	Cursor string
+}
+
+type BlockInput struct {
+	ID string
+}
+
 // List Retrieves block descriptions.
-func (b *Block) List(cursor string) (*Blocks, error) {
-	resp, err := b.c.Request(http.MethodGet, "/blocks", new(bytes.Buffer), nil)
+func (b *Block) List(input *BlockCursorInput) (*Blocks, error) {
+	params := make(map[string]string)
+	params["cursor"] = input.Cursor
+	resp, err := b.c.Request(http.MethodGet, "/blocks", new(bytes.Buffer), params)
 	if err != nil {
 		return &Blocks{}, err
 	}
@@ -108,8 +118,8 @@ func (b *Block) List(cursor string) (*Blocks, error) {
 }
 
 // Get Get block descriptor for block at height
-func (b *Block) Get(hash string) (*Block, error) {
-	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s", hash), new(bytes.Buffer), nil)
+func (b *Block) Get(input *BlockInput) (*Block, error) {
+	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Block{}, err
 	}
@@ -124,8 +134,10 @@ func (b *Block) Get(hash string) (*Block, error) {
 }
 
 // CurrentHeight Gets the current height of the blockchainn.
-func (b *Block) CurrentHeight(cursor string) (*Height, error) {
-	resp, err := b.c.Request(http.MethodGet, "/blocks/height", new(bytes.Buffer), nil)
+func (b *Block) CurrentHeight(input *BlockCursorInput) (*Height, error) {
+	params := make(map[string]string)
+	params["cursor"] = input.Cursor
+	resp, err := b.c.Request(http.MethodGet, "/blocks/height", new(bytes.Buffer), params)
 	if err != nil {
 		return &Height{}, err
 	}
@@ -140,8 +152,10 @@ func (b *Block) CurrentHeight(cursor string) (*Height, error) {
 }
 
 // Stats Get statistics on block production times.
-func (b *Block) Stats(cursor string) (*BlockStats, error) {
-	resp, err := b.c.Request(http.MethodGet, "/blocks/stats", new(bytes.Buffer), nil)
+func (b *Block) Stats(input *BlockCursorInput) (*BlockStats, error) {
+	params := make(map[string]string)
+	params["cursor"] = input.Cursor
+	resp, err := b.c.Request(http.MethodGet, "/blocks/stats", new(bytes.Buffer), params)
 	if err != nil {
 		return &BlockStats{}, err
 	}
@@ -156,8 +170,8 @@ func (b *Block) Stats(cursor string) (*BlockStats, error) {
 }
 
 // GetHeight Get block descriptor for block at height
-func (b *Block) GetHeight(height string) (*BlockHeight, error) {
-	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/height", height), new(bytes.Buffer), nil)
+func (b *Block) GetHeight(input *BlockInput) (*BlockHeight, error) {
+	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/height", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &BlockHeight{}, err
 	}
@@ -172,8 +186,8 @@ func (b *Block) GetHeight(height string) (*BlockHeight, error) {
 }
 
 // Transactions Get transactions for a block at a given height.
-func (b *Block) Transactions(height string) (*Transactions, error) {
-	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/transactions", height), new(bytes.Buffer), nil)
+func (b *Block) Transactions(input *BlockInput) (*Transactions, error) {
+	resp, err := b.c.Request(http.MethodGet, fmt.Sprintf("/blocks/%s/transactions", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Transactions{}, err
 	}

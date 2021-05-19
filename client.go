@@ -14,8 +14,6 @@ const (
 	BETAURL = "api.helium.wtf/v1"
 	// HTTPTimeout timeout for http requests
 	DefaultHTTPTimeout = 60
-	// NoQuery for empty queries
-	NoQuery = ""
 )
 
 // Client provides http access to helium api

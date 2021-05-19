@@ -8,7 +8,7 @@ import (
 
 func main() {
 	client := helium.DefaultClient()
-	height, err := client.Block().CurrentHeight(helium.NoQuery)
+	height, err := client.Block().CurrentHeight(&helium.BlockCursorInput{})
 	if err != nil {
 		fmt.Println(err)
 	}

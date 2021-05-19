@@ -34,9 +34,13 @@ type LocationData struct {
 	ShortStreet  string `json:"short_street"`
 }
 
+type LocationInput struct {
+	ID string
+}
+
 // Get gets geographic information for a given location
-func (l *Location) Get(id string) (*LocationInfo, error) {
-	resp, err := l.c.Request(http.MethodGet, fmt.Sprintf("/location/%s", id), new(bytes.Buffer), nil)
+func (l *Location) Get(input *LocationInput) (*LocationInfo, error) {
+	resp, err := l.c.Request(http.MethodGet, fmt.Sprintf("/location/%s", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &LocationInfo{}, err
 	}

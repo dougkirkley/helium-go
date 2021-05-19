@@ -32,13 +32,21 @@ type CityData struct {
 	ShortState   string `json:"short_state"`
 }
 
+type CitySearchInput struct {
+	Term string
+}
+
+type CityInput struct {
+	ID string
+}
+
 // Search List all known hotspot cities with the total hotspot count for each city. 
-func (c *City) Search(term string) (*Cities, error) {
-	if len(term) < 1 {
+func (c *City) Search(input *CitySearchInput) (*Cities, error) {
+	if len(input.Term) < 1 {
 		return &Cities{}, fmt.Errorf("search term must be 1 character or more, 3 is recommended")
 	}
 	params := make(map[string]string)
-	params["search"] = term
+	params["search"] = input.Term
 	resp, err := c.c.Request(http.MethodGet, "/cities", new(bytes.Buffer), params)
 	if err != nil {
 		return &Cities{}, err
@@ -54,8 +62,8 @@ func (c *City) Search(term string) (*Cities, error) {
 }
 
 // Hotspots Lists all known hotspots for a given city_id.
-func (c *City) Hotspots(id string) (*Hotspots, error) {
-	resp, err := c.c.Request(http.MethodGet, fmt.Sprintf("/cities/%s/hotspots", id), new(bytes.Buffer), nil)
+func (c *City) Hotspots(input *CityInput) (*Hotspots, error) {
+	resp, err := c.c.Request(http.MethodGet, fmt.Sprintf("/cities/%s/hotspots", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Hotspots{}, err
 	}

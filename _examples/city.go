@@ -8,7 +8,10 @@ import (
 
 func main() {
 	client := helium.DefaultClient()
-	hotspots, err := client.City().Hotspots("aG91c3RvbnRleGFzdW5pdGVkIHN0YXRlcw")
+	input := &helium.CityInput{
+		ID: "aG91c3RvbnRleGFzdW5pdGVkIHN0YXRlcw",
+	}
+	hotspots, err := client.City().Hotspots(input)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -117,6 +117,38 @@ type WitnessInfo struct {
 	RecentTime int64     `json:"recent_time"`
 }
 
+type HotspotInput struct {
+	Address string
+	Name    string
+}
+
+type HotspotSearchInput struct {
+	Term string
+}
+
+type HotspotDistanceInput struct {
+	Lat      float64
+	Lon      float64
+	Distance int
+}
+
+type HotspotBoxInput struct {
+	Swlat float64
+	Swlon float64
+	Nelat float64
+	Nelon float64
+}
+
+type HotspotHexInput struct {
+	ID string
+}
+
+type HotspotRewardsInput struct {
+	Address string
+	MaxTime string
+	MinTime string
+}
+
 // List known hotspots as registered on the blockchain.
 func (h *Hotspot) List() (*Hotspots, error) {
 	resp, err := h.c.Request(http.MethodGet, "/hotspots", new(bytes.Buffer), nil)
@@ -134,8 +166,8 @@ func (h *Hotspot) List() (*Hotspots, error) {
 }
 
 // Get Fetch a hotspot with a given address.
-func (h *Hotspot) Get(address string) (*HotspotInfo, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s", address), new(bytes.Buffer), nil)
+func (h *Hotspot) Get(input *HotspotInput) (*HotspotInfo, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s", input.Address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &HotspotInfo{}, err
 	}
@@ -149,9 +181,9 @@ func (h *Hotspot) Get(address string) (*HotspotInfo, error) {
 	return hotspotInfo, nil
 }
 
-// GetByName Fetch the hotspots which map to the given 3-word animal name. 
-func (h *Hotspot) GetByName(name string) (*Hotspots, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/name/%s", name), new(bytes.Buffer), nil)
+// GetByName Fetch the hotspots which map to the given 3-word animal name.
+func (h *Hotspot) GetByName(input *HotspotInput) (*Hotspots, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/name/%s", input.Name), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Hotspots{}, err
 	}
@@ -166,12 +198,12 @@ func (h *Hotspot) GetByName(name string) (*Hotspots, error) {
 }
 
 // Search Fetch the hotspots which match a search term in the given search term query parameter.
-func (h *Hotspot) Search(term string) (*Hotspots, error) {
-	if len(term) < 1 {
+func (h *Hotspot) Search(input *HotspotSearchInput) (*Hotspots, error) {
+	if len(input.Term) < 1 {
 		return &Hotspots{}, fmt.Errorf("search term must be 1 character or more, 3 is recommended")
 	}
 	params := make(map[string]string)
-	params["search"] = term
+	params["search"] = input.Term
 	resp, err := h.c.Request(http.MethodGet, "/hotspots/name", new(bytes.Buffer), params)
 	if err != nil {
 		return &Hotspots{}, err
@@ -187,11 +219,11 @@ func (h *Hotspot) Search(term string) (*Hotspots, error) {
 }
 
 // Distance Fetch the hotspots which are within a given number of meters from the given lat and lon coordinates.
-func (h *Hotspot) Distance(lat float64, lon float64, distance int) (*Hotspots, error) {
+func (h *Hotspot) Distance(input *HotspotDistanceInput) (*Hotspots, error) {
 	params := make(map[string]string)
-	params["lat"] = fmt.Sprintf("%v", lat)
-	params["lon"] = fmt.Sprintf("%v", lon)
-	params["distance"] = fmt.Sprintf("%v", distance)
+	params["lat"] = fmt.Sprintf("%v", input.Lat)
+	params["lon"] = fmt.Sprintf("%v", input.Lon)
+	params["distance"] = fmt.Sprintf("%v", input.Distance)
 	resp, err := h.c.Request(http.MethodGet, "/hotspots/location/distance", new(bytes.Buffer), params)
 	if err != nil {
 		return &Hotspots{}, err
@@ -207,12 +239,12 @@ func (h *Hotspot) Distance(lat float64, lon float64, distance int) (*Hotspots, e
 }
 
 // Box Fetch the hotspots which are within a given geographic boundary indicated by it's south-wesetern and north-eastern co-ordinates.
-func (h *Hotspot) Box(swlat float64, swlon float64, nelat float64, nelon float64) (*Hotspots, error) {
+func (h *Hotspot) Box(input *HotspotBoxInput) (*Hotspots, error) {
 	params := make(map[string]string)
-	params["swlat"] = fmt.Sprintf("%v", swlat)
-	params["swlon"] = fmt.Sprintf("%v", swlon)
-	params["nelat"] = fmt.Sprintf("%v", nelat)
-	params["nelon"] = fmt.Sprintf("%v", nelon)
+	params["swlat"] = fmt.Sprintf("%v", input.Swlat)
+	params["swlon"] = fmt.Sprintf("%v", input.Swlon)
+	params["nelat"] = fmt.Sprintf("%v", input.Nelat)
+	params["nelon"] = fmt.Sprintf("%v", input.Nelon)
 	resp, err := h.c.Request(http.MethodGet, "/hotspots/location/box", new(bytes.Buffer), params)
 	if err != nil {
 		return &Hotspots{}, err
@@ -228,8 +260,8 @@ func (h *Hotspot) Box(swlat float64, swlon float64, nelat float64, nelon float64
 }
 
 // GetByHex Fetch the hotspots which are in the given h3 index.
-func (h *Hotspot) GetByHex(hex string) (*HotspotInfo, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/hex/%s", hex), new(bytes.Buffer), nil)
+func (h *Hotspot) GetByHex(input *HotspotHexInput) (*HotspotInfo, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/hex/%s", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &HotspotInfo{}, err
 	}
@@ -243,8 +275,8 @@ func (h *Hotspot) GetByHex(hex string) (*HotspotInfo, error) {
 }
 
 // Activity Lists all blockchain transactions that the given hotspot was involved in.
-func (h *Hotspot) Activity(address string) (*HotspotsActivity, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/activity", address), new(bytes.Buffer), nil)
+func (h *Hotspot) Activity(input *HotspotInput) (*HotspotsActivity, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/activity", input.Address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &HotspotsActivity{}, err
 	}
@@ -259,8 +291,8 @@ func (h *Hotspot) Activity(address string) (*HotspotsActivity, error) {
 }
 
 // ActivityCount Count transactions that indicate activity for a hotspot.
-func (h *Hotspot) ActivityCount(address string) (*HotspotActivityCount, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/activity/count", address), new(bytes.Buffer), nil)
+func (h *Hotspot) ActivityCount(input *HotspotInput) (*HotspotActivityCount, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/activity/count", input.Address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &HotspotActivityCount{}, err
 	}
@@ -275,8 +307,8 @@ func (h *Hotspot) ActivityCount(address string) (*HotspotActivityCount, error) {
 }
 
 // Elections Lists the consensus group transactions that the given hotspot was involved in.
-func (h *Hotspot) Elections(address string) (*Elections, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/elections", address), new(bytes.Buffer), nil)
+func (h *Hotspot) Elections(input *HotspotInput) (*Elections, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/elections", input.Address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Elections{}, err
 	}
@@ -306,10 +338,9 @@ func (h *Hotspot) CurrentlyElected() (*Elections, error) {
 	return elections, nil
 }
 
-
 // Challenges Lists the challenge (receipts) that the given hotspot a challenger, challengee or a witness in.
-func (h *Hotspot) Challenges(address string) (*Challenges, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/challenges", address), new(bytes.Buffer), nil)
+func (h *Hotspot) Challenges(input *HotspotInput) (*Challenges, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/challenges", input.Address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Challenges{}, err
 	}
@@ -324,11 +355,11 @@ func (h *Hotspot) Challenges(address string) (*Challenges, error) {
 }
 
 // Rewards Returns reward entries by block and gateway for a given account in a timeframe.
-func (h *Hotspot) Rewards(address string, maxTime string, minTime string) (*Rewards, error) {
+func (h *Hotspot) Rewards(input *HotspotRewardsInput) (*Rewards, error) {
 	params := make(map[string]string)
-	params["min_time"] = minTime
-	params["max_time"] = maxTime
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/rewards", address), new(bytes.Buffer), params)
+	params["min_time"] = input.MinTime
+	params["max_time"] = input.MaxTime
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/rewards", input.Address), new(bytes.Buffer), params)
 	if err != nil {
 		return &Rewards{}, err
 	}
@@ -343,8 +374,8 @@ func (h *Hotspot) Rewards(address string, maxTime string, minTime string) (*Rewa
 }
 
 //RewardSum Returns rewards for a given hotspot per reward block the hotspot is in, for a given timeframe.
-func (h *Hotspot) RewardSum(address string) (*RewardSum, error) {
-	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/rewards/sum", address), new(bytes.Buffer), nil)
+func (h *Hotspot) RewardSum(input *HotspotInput) (*RewardSum, error) {
+	resp, err := h.c.Request(http.MethodGet, fmt.Sprintf("/hotspots/%s/rewards/sum", input.Address), new(bytes.Buffer), nil)
 	if err != nil {
 		return &RewardSum{}, err
 	}

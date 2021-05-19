@@ -8,7 +8,7 @@ import (
 
 func main() {
 	client := helium.DefaultClient()
-	accounts, err := client.Account().List(helium.NoQuery)
+	accounts, err := client.Account().List(&helium.AccountListInput{})
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -281,12 +281,22 @@ type AccountStatsData struct {
 	LastDay   []LastDay   `json:"last_day"`
 }
 
+type AccountListInput struct {
+	Cursor string
+}
+
+type AccountRichestInput struct {
+	Limit int
+}
+
+type AccountInput struct {
+	ID string
+}
+
 // List Retrieves the current set of known accounts
-func (a *Account) List(cursor string) (*Accounts, error) {
+func (a *Account) List(input *AccountListInput) (*Accounts, error) {
 	params := make(map[string]string)
-	if len(cursor) > 0 {
-		params["cursor"] = cursor
-	}
+	params["cursor"] = input.Cursor
 	resp, err := a.c.Request(http.MethodGet, "/accounts", new(bytes.Buffer), params)
 	if err != nil {
 		return &Accounts{}, err
@@ -302,10 +312,10 @@ func (a *Account) List(cursor string) (*Accounts, error) {
 }
 
 // Richest Returns up to 100 of the accounts sorted by highest token balance.
-func (a *Account) Richest(limit int) (*Accounts, error) {
+func (a *Account) Richest(input *AccountRichestInput) (*Accounts, error) {
 	params := make(map[string]string)
-	if limit > 0 {
-		params["limit"] = fmt.Sprintf("%v", limit)
+	if input.Limit > 0 {
+		params["limit"] = fmt.Sprintf("%v", input.Limit)
 	}
 	resp, err := a.c.Request(http.MethodGet, "/accounts/rich", new(bytes.Buffer), params)
 	if err != nil {
@@ -322,8 +332,8 @@ func (a *Account) Richest(limit int) (*Accounts, error) {
 }
 
 // Get Retrieve a specific account record.
-func (a *Account) Get(accountID string) (*UserAccount, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", accountID), new(bytes.Buffer), nil)
+func (a *Account) Get(input *AccountInput) (*UserAccount, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &UserAccount{}, err
 	}
@@ -338,8 +348,8 @@ func (a *Account) Get(accountID string) (*UserAccount, error) {
 }
 
 // Hotspots Fetches hotspots owned by a given account address.
-func (a *Account) Hotspots(accountID string) (*Hotspots, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/hotspots", accountID), new(bytes.Buffer), nil)
+func (a *Account) Hotspots(input *AccountInput) (*Hotspots, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/hotspots", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Hotspots{}, err
 	}
@@ -354,8 +364,8 @@ func (a *Account) Hotspots(accountID string) (*Hotspots, error) {
 }
 
 // Ouis Fetches OUIs owned by a given account address.
-func (a *Account) Ouis(accountID string) (*Ouis, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/ouis", accountID), new(bytes.Buffer), nil)
+func (a *Account) Ouis(input *AccountInput) (*Ouis, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/ouis", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Ouis{}, err
 	}
@@ -370,8 +380,8 @@ func (a *Account) Ouis(accountID string) (*Ouis, error) {
 }
 
 // Activity Fetches transactions that indicate activity for an account.
-func (a *Account) Activity(accountID string) (*Activity, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity", accountID), new(bytes.Buffer), nil)
+func (a *Account) Activity(input *AccountInput) (*Activity, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Activity{}, err
 	}
@@ -386,8 +396,8 @@ func (a *Account) Activity(accountID string) (*Activity, error) {
 }
 
 // ActivityCount Count transactions that indicate activity for an account.
-func (a *Account) ActivityCount(accountID string) (*ActivityCount, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity/count", accountID), new(bytes.Buffer), nil)
+func (a *Account) ActivityCount(input *AccountInput) (*ActivityCount, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/activity/count", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &ActivityCount{}, err
 	}
@@ -402,8 +412,8 @@ func (a *Account) ActivityCount(accountID string) (*ActivityCount, error) {
 }
 
 // Elections Fetches elections that hotspots for the given account are elected in.
-func (a *Account) Elections(accountID string) (*Elections, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/elections", accountID), new(bytes.Buffer), nil)
+func (a *Account) Elections(input *AccountInput) (*Elections, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/elections", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Elections{}, err
 	}
@@ -418,8 +428,8 @@ func (a *Account) Elections(accountID string) (*Elections, error) {
 }
 
 // Challenges Fetches challenges that hotspots owned by the given account are involved in as a challenger, challengee, or witness.
-func (a *Account) Challenges(accountID string) (*Challenges, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/challenges", accountID), new(bytes.Buffer), nil)
+func (a *Account) Challenges(input *AccountInput) (*Challenges, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/challenges", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Challenges{}, err
 	}
@@ -434,8 +444,8 @@ func (a *Account) Challenges(accountID string) (*Challenges, error) {
 }
 
 // PendingTransactions Fetches the outstanding transactions for the given account.
-func (a *Account) PendingTransactions(accountID string) (*PendingTransactions, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/pending_transactions", accountID), new(bytes.Buffer), nil)
+func (a *Account) PendingTransactions(input *AccountInput) (*PendingTransactions, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/pending_transactions", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &PendingTransactions{}, err
 	}
@@ -450,8 +460,8 @@ func (a *Account) PendingTransactions(accountID string) (*PendingTransactions, e
 }
 
 // Rewards Returns reward entries by block and gateway for a given account in a timeframe.
-func (a *Account) Rewards(accountID string) (*Rewards, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards", accountID), new(bytes.Buffer), nil)
+func (a *Account) Rewards(input *AccountInput) (*Rewards, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &Rewards{}, err
 	}
@@ -466,8 +476,8 @@ func (a *Account) Rewards(accountID string) (*Rewards, error) {
 }
 
 //RewardSum Returns the total rewards for a given account in a given timeframe.
-func (a *Account) RewardSum(accountID string) (*RewardSum, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards/sum", accountID), new(bytes.Buffer), nil)
+func (a *Account) RewardSum(input *AccountInput) (*RewardSum, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/rewards/sum", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &RewardSum{}, err
 	}
@@ -482,8 +492,8 @@ func (a *Account) RewardSum(accountID string) (*RewardSum, error) {
 }
 
 // Stats Fetches account statistics for a given account.
-func (a *Account) Stats(accountID string) (*AccountStats, error) {
-	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/stats", accountID), new(bytes.Buffer), nil)
+func (a *Account) Stats(input *AccountInput) (*AccountStats, error) {
+	resp, err := a.c.Request(http.MethodGet, fmt.Sprintf("/accounts/%s/stats", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &AccountStats{}, err
 	}

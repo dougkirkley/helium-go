@@ -2,10 +2,10 @@ package helium
 
 import (
 	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
-	"encoding/base64"
 	"time"
 )
 
@@ -43,9 +43,17 @@ type TransactionSubmitBody struct {
 	Txn string `json:"txn"`
 }
 
+type PendingTransactionInput struct {
+	ID string
+}
+
+type TransactionSubmitInput struct {
+	Transaction string
+}
+
 // Get Fetches the status for a given pending transaction hash.
-func (t *PendingTransaction) Get(hash string) (*PendingTransactions, error) {
-	resp, err := t.c.Request(http.MethodGet, fmt.Sprintf("/pending_transactions/%s", hash), new(bytes.Buffer), nil)
+func (t *PendingTransaction) Get(input *PendingTransactionInput) (*PendingTransactions, error) {
+	resp, err := t.c.Request(http.MethodGet, fmt.Sprintf("/pending_transactions/%s", input.ID), new(bytes.Buffer), nil)
 	if err != nil {
 		return &PendingTransactions{}, err
 	}
@@ -60,8 +68,8 @@ func (t *PendingTransaction) Get(hash string) (*PendingTransactions, error) {
 }
 
 // Submit New transactions can be submitted to the blockchain by sending a pending transaction.
-func (t *PendingTransaction) Submit(transaction string) error {
-	encodedTransaction := base64.StdEncoding.EncodeToString([]byte(transaction))
+func (t *PendingTransaction) Submit(input *TransactionSubmitInput) error {
+	encodedTransaction := base64.StdEncoding.EncodeToString([]byte(input.Transaction))
 	transactionData := TransactionSubmitBody{
 		Txn: encodedTransaction,
 	}
